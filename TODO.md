@@ -1,3 +1,4 @@
 - RCON
-- scale db optz to 100+ prodrate
+- imp db
+-- scale db optz to 100+ prodrate
 - finish README.md
