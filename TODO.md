@@ -1,0 +1,3 @@
+- RCON
+- scale db optz to 100+ prodrate
+- finish README.md

@@ -4,3 +4,4 @@ pynacl
 davey
 yt-dlp
 ffmpeg-python
+asyncpg
