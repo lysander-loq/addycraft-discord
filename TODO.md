@@ -1,4 +1,5 @@
 - [ ] RCON
-- [ ] imp db
-- [ ] scale db optz to 100+ prodrate
+- [x] imp db
+- [ ] music vol FF
 - [ ] finish README.md
+- [ ] db audit & structs
