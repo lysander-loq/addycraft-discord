@@ -1,18 +1,30 @@
 from discord.ext import commands
-import os, dotenv, discord, logging, asyncpg
+import os, dotenv, discord, logging, aiosqlite
+os.makedirs("/data/",exist_ok=True) #too much never hurts!
 from src import bot_class
 from fixedstr import *
-class Database(commands.Cog):
-    def __init__(self, bot:bot_class.Bot):
+def clamp_vol(v:int,t:int=150) -> int:
+    return max(0,min(t,v))
+class DatabaseModule(commands.Cog):
+    def __init__(self, bot:bot_class.Bot, database_connection:aiosqlite.Connection):
         self.bot = bot
-        self._logger = logging.getLogger(self.__class__.__name__)
         os.makedirs("/data/",exist_ok=True)
-        
+        self.db=database_connection
+        self._logger = logging.getLogger(self.__class__.__name__)
     def _log(self, msg:str):
         self._logger.info(msg)
+    async def volume_set(self,gid:int,vol:int=100):
+        vol=clamp_vol(vol)
+        self.db.execute("INSERT INTO music_vol(guild,volume)VALUES(?,?)",(gid,vol))
+    async def volume_get(self,gid:int):
+        row = await(await self.db.execute("SELECT value FROM music_vol WHERE guild = ?",(gid,))).fetchone()
+        return row[0] if row else 100
 
 async def setup(bot):
-    cog = Database(bot)
+    os.makedirs("/data/",exist_ok=True)
+    conn=await aiosqlite.connect("/data/database.db")
+    await conn.execute(open("/src/dbtables.sql").read())
+    cog = DatabaseModule(bot, conn)
     await bot.add_cog(cog)
     cog._log(load_s)
 
