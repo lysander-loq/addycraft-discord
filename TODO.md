@@ -1,5 +1,5 @@
 - [ ] RCON
 - [x] imp db
-- [ ] music vol FF
+- [x] music vol FF
 - [ ] finish README.md
 - [ ] db audit & structs

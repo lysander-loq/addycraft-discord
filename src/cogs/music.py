@@ -9,7 +9,6 @@ from src.helpers import *
 def _extract(query:str, ytdlp_opts:dict):
     with yt_dlp.YoutubeDL(ytdlp_opts) as ytdlp:
         return ytdlp.extract_info(query, download=False)
-
 class Music(commands.Cog):
     music = app_commands.Group(name="music", description="Music commands")
     def __init__(self, bot:bot_class.Bot):
@@ -23,14 +22,16 @@ class Music(commands.Cog):
             "quiet": True,
             "no_warnings": True
         }
-        self.ffmpeg_opts = {
-            "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            "options": "-vn -c:a libopus -b:a 96k -loglevel quiet"
-        }
         self.queues = {}
         self._logger = logging.getLogger(self.__class__.__name__)
     def _log(self, msg:str):
         self._logger.info(msg)
+    async def get_ffmpeg_opts(self, guild_id: int):
+        vol = await self.bot.get_cog("DatabaseModule").volume_get(guild_id)
+        return {
+            "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            "options": f"-vn -c:a libopus -b:a 96k -loglevel quiet -af vol={vol/150}"
+        }
     async def search_youtube(self, query:str):
         return await(asyncio.get_running_loop()).run_in_executor(None, _extract, query, self.ytdlp_opts)
     async def broadcast_queue_update(self, message:str, id:int):
@@ -155,11 +156,29 @@ class Music(commands.Cog):
             voice_client.stop()
         await voice_client.disconnect()
         await interaction.followup.send("Disconnected from the voice channel.")
+    @music.command(name="volume",description="Sets/gets the default playback volume for this server.")
+    async def volume(self,interaction:discord.Interaction,vol:int=None):
+        voice_client = interaction.guild.voice_client
+        #~ begin block early return
+        if not is_dj(interaction.user):return await interaction.response.send_message(no_dj,ephemeral=True)
+        else:await interaction.response.defer()
+        if not voice_client:
+            return await interaction.followup.send(no_vcl,ephemeral=True)
+        if vol is not None:
+            if vol>150:
+                return await interaction.followup.send(v_ab,ephemeral=True)
+            elif vol<=0:
+                return await interaction.followup.send(v_bl,ephemeral=True)
+        #~ finish block early return
+        if vol is not None:
+            await self.bot.get_cog("DatabaseModule").volume_set(interaction.guild.id,vol)
+            return await interaction.followup.send("The server playback volume has succesfully been set to **{}%**, please skip to the next song in the queue or restart for the newly set volume to take effect".format(vol),ephemeral=True)
+        else:
+            return await interaction.followup.send("The server playback volume is currently set to **{}%**".format(await self.bot.get_cog("DatabaseModule").volume_get(interaction.guild.id)),ephemeral=True)
 async def setup(bot):
     cog = Music(bot)
     await bot.add_cog(cog)
     cog._log(load_s)
-
 ##DEVNOTES:
 ## .format() and ondef type annotations are NOT used in an attempt to be
 ## in the very least compatible with older versions of python.

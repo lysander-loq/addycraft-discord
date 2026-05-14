@@ -4,7 +4,7 @@ os.makedirs("/data/",exist_ok=True) #too much never hurts!
 from src import bot_class
 from fixedstr import *
 def clamp_vol(v:int,t:int=150) -> int:
-    return max(0,min(t,v))
+    return max(1,min(t,v))
 class DatabaseModule(commands.Cog):
     def __init__(self, bot:bot_class.Bot, database_connection:aiosqlite.Connection):
         self.bot = bot
