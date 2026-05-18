@@ -1,5 +1,6 @@
 - [ ] RCON
 - [x] imp db
 - [x] music vol FF
+- [x] full perm system
 - [ ] finish README.md
 - [ ] db audit & structs
