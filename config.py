@@ -14,3 +14,7 @@ CONST_DEVELOPERS_MAXPERM_DEBUG = True
 # if True, users hardcoded in src/cnst.py::developers_uid will be considered tier 0 (max permissions)
 # this is strictly for testing purposes, and should be set to False when in production use
 # Hardcoded users in src/cnst.py::developers_uid will still have a minimum tier of 2 (moderator) if this is set to False
+
+ARE_ACTIONS_AUDITED = True
+# if True, all actions that require a certain permission tier (DEVreq excluded) will be logged in
+# the database-backed audit log, visible with slash commands to all staff
