@@ -16,7 +16,7 @@ class MainCustomizedEventListener(commands.Cog):
         try:
             await self.bot.on_ready_lock.acquire() # run cog on_ready after root on_ready finishes
             self._log("Hello from {} on_ready event listener!".format(self.__class__.__name__))
-            if AUTOLEAVE_UNTRUSTED_SERVERS or STRICT_SECURITY:
+            if AUTOLEAVE_UNTRUSTED_SERVERS:
                 for guild in self.bot.guilds:
                     if guild.id not in (main_server_id, staff_server_id):
                         self._logger.warning("Bot is in an untrusted server on startup, leaving it automatically due to AUTOLEAVE_UNTRUSTED_SERVERS or STRICT_SECURITY being set.")
@@ -33,7 +33,7 @@ class MainCustomizedEventListener(commands.Cog):
             self.bot.on_ready_lock.release() # release lock so cog on_ready functions can run if they need to
     @commands.Cog.listener()
     async def on_guild_join(self,guild:discord.Guild):
-        if AUTOLEAVE_UNTRUSTED_SERVERS or STRICT_SECURITY:
+        if AUTOLEAVE_UNTRUSTED_SERVERS:
             self._logger.warning("Bot has joined an untrusted server, leaving it automatically due to AUTOLEAVE_UNTRUSTED_SERVERS or STRICT_SECURITY being set.")
             self._logger.warning("\tServer name: {}".format(guild.name))
             self._logger.warning("\tServer ID: {}".format(guild.id))
@@ -54,7 +54,7 @@ class MainCustomizedEventListener(commands.Cog):
         elif member.guild.id==main_server_id:
             await self.bot.get_channel(mainserver_entry_channel_id).send("Welcome, {} has joined the server! Please make sure to read the rules and look at any posted announcements for any important information posted recently. If you need any help, check out our Community Support channel or our Tickets channel. Thanks for joining and we are really glad to have you!".format(member.mention))
         else:
-            if not (STRICT_SECURITY or AUTOLEAVE_UNTRUSTED_SERVERS):
+            if not AUTOLEAVE_UNTRUSTED_SERVERS:
                 self._logger.warning("Someone just joined an unknown server, this likely means the bot has been invited somewhere it shouldn't have been invited.")
                 self._logger.warning("Member: {} ({}), Server: {} ({}), can we create an invite there? {}".format(member.display_name, member.id, member.guild.name, member.guild.id, "Yes, you may want to join it to check out what the unrecognised server is"if member.guild.get_member(self.bot.user.id).guild_permissions.create_instant_invite else "No, but the server can be automatically left if the bot is started with the STRICT_SECURITY flag set in the configuration file."))
             else:

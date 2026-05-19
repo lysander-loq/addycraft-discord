@@ -23,14 +23,16 @@ class PermissionTier:
 
     @property
     def name(self):
+        x="" if not self.DEV else "[ovr] "
         match self.tier:
-            case 0:return "Owner"
-            case 1:return "Sr. Admin"
-            case 2:return "Administrator"
-            case 3:return "Sr. Moderator"
-            case 4:return "Moderator"
-            case 5:return "Helper"
-            case _:return "User"
+            case 0:x="Owner"
+            case 1:x="Sr. Admin"
+            case 2:x="Administrator"
+            case 3:x="Sr. Moderator"
+            case 4:x="Moderator"
+            case 5:x="Helper"
+            case _:x="User"
+        return x
 
     # strict checks
     @property
