@@ -9,7 +9,7 @@ from fixedstr import *
 class PermissionTier:
     def __init__(self,user:discord.Member):
         self.user=user
-        self.DEV = CONST_DEVELOPERS_MAXPERM_DEBUG if user.id in cnst.developers else False
+        self.cond = CONST_DEVELOPERS_MAXPERM_DEBUG if user.id in cnst.developers else False
     @property
     def tier(self):
         user=self.user
@@ -112,6 +112,6 @@ def codeblock_wrap(text:str|Exception|list[str],lang:str=""):
 def log_exc(logger:logging.Logger,e:Exception):
     for i in "".join(traceback.format_exception(e)).splitlines():
         logger.error(i)
-        
+
 def fresh(message:discord.Message):
     return discord.utils.utcnow() - message.created_at > datetime.timedelta(weeks=2)

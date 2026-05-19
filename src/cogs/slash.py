@@ -95,6 +95,7 @@ class UserDemotedContainer(ui.Container):
         self.add_item(ui.TextDisplay(content="We regret to inform you that you have been demoted to `{}` by {}.\n\nReason:\n{}".format(pt.ttn(self.new), self.author.mention, self.reason if self.reason is not None else "No reason provided.")))
 class BasicSlashCommands(commands.Cog):
     staff=app_commands.Group(name="staff",description="Commands to manage the staff team")
+    steam=app_commands.Group(name="team",description="Commands for the staff server",guild_ids=[staff_server_id])
     def __init__(self, bot:bot_class.Bot):
         self.bot = bot
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -276,6 +277,18 @@ class BasicSlashCommands(commands.Cog):
         except Exception as e:
             log_exc(self._logger, e)
             await interaction.followup.send("An error occurred while creating the BOLO.\n"+codeblock_wrap(traceback.format_exception(e)), ephemeral=True)
+    @steam.command(name="request", description="Submit a request to a higher-up staff rank.")
+    @app_commands.choices(role=[
+        app_commands.Choice(name="Helpers", value=helper_role_ids[0]),
+        app_commands.Choice(name="Moderators", value=mod_role_ids[0]),
+        app_commands.Choice(name="Sr. Moderators", value=sr_mod_role_ids[0]),
+        app_commands.Choice(name="Administrators", value=admin_role_ids[0]),
+        app_commands.Choice(name="Sr. Administrators", value=sr_admin_role_ids[0]),
+        app_commands.Choice(name="Owner", value=owner_role_ids[0])
+    ])
+    async def request(self, interaction: discord.Interaction, rank: app_commands.Choice[int], message: str):
+        return await interaction.response.send_message(PCD,ephemeral=True) # TODO: implement this command
+
 async def setup(bot):
     cog = BasicSlashCommands(bot)
     await bot.add_cog(cog)

@@ -7,7 +7,7 @@ from config import *
 rootl = logging.getLogger()
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix="NOPREFIX",intents=discord.Intents.all(),help_command=None) # .all() will be changed, this is for testing
+        super().__init__(command_prefix="~~",intents=discord.Intents.all(),help_command=None) # .all() will be changed, this is for testing
         self.on_ready_lock = asyncio.Lock() # allows only one on_ready to run at a time
     async def setup_hook(self):
         await self.on_ready_lock.acquire() # so cogs don't run their on_ready code before the root on_ready has finished

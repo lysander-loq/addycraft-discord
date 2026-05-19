@@ -2,5 +2,9 @@
 - [x] imp db
 - [x] music vol FF
 - [x] full perm system
-- [ ] finish README.md
-- [ ] db audit & structs
+- [x] finish README.md
+- [x] dev commands
+- [ ] db audit
+- [ ] commands
+    - [ ] /team request <rank> <message>
+    - adzel put something else here plsss :3
