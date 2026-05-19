@@ -17,20 +17,20 @@ class DatabaseModule(commands.Cog):
         vol=clamp_vol(vol)
         self.db.execute("INSERT INTO music_vol(guild,volume)VALUES(?,?)",(gid,vol))
     async def volume_get(self,gid:int):
-        row = await(await self.db.execute("SELECT value FROM music_vol WHERE guild = ?",(gid,))).fetchone()
+        row = await(await self.db.execute("SELECT volume FROM music_vol WHERE guild = ?",(gid,))).fetchone()
         return row[0] if row else 100
     async def kv_bl_exists(self,uid:int):
-        row = await(await self.db.execute("SELECT value FROM kv_bl WHERE userid = ?",(uid,))).fetchone()
+        row = await(await self.db.execute("SELECT dat FROM kv_bl WHERE uid = ?",(uid,))).fetchone()
         return bool(row)
     async def kv_bl_setdata(self,uid:int,data:bytes):
-        await self.db.execute("INSERT INTO kv_bl(userid,value)VALUES(?,?)",(uid,data))
+        await self.db.execute("INSERT INTO kv_bl(uid,dat)VALUES(?,?)",(uid,data))
     async def kv_bl_getdata(self,uid:int):
-        row = await(await self.db.execute("SELECT value FROM kv_bl WHERE userid = ?",(uid,))).fetchone()
+        row = await(await self.db.execute("SELECT dat FROM kv_bl WHERE uid = ?",(uid,))).fetchone()
         return row[0] if row else b""
     async def kv_bl_del(self,uid:int):
-        await self.db.execute("DELETE FROM kv_bl WHERE userid = ?",(uid,))
+        await self.db.execute("DELETE FROM kv_bl WHERE uid = ?",(uid,))
     async def kv_bl_hash(self,uid:int):
-        row = await(await self.db.execute("SELECT value FROM kv_bl WHERE userid = ?",(uid,))).fetchone()
+        row = await(await self.db.execute("SELECT dat FROM kv_bl WHERE uid = ?",(uid,))).fetchone()
         data = row[0] if row else b""
         return hashlib.md5(data).hexdigest()
 
