@@ -13,6 +13,7 @@ developers = list(developers_uid.values())
 main_server_id = 1451282482103062653
 staff_server_id = 1451022861706989712
 
+chat_relay_channel_ids = [1506728862669607104]
 
 music_queue_channel_ids = [1497731786107785256,1497740461786398890]
 
