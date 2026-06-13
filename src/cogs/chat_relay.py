@@ -1,20 +1,23 @@
 from discord.ext import commands
-import os, dotenv, discord, logging
+import os, dotenv, discord, logging, traceback
 from src import bot_class
+from discord import app_commands
 from aiohttp import web
 from fixedstr import *
 from cnst import *
-from helpers import log_exc
+from helpers import log_exc, PermissionTier as pt, codeblock_wrap
 class AsyncHttpChatRelay(commands.Cog):
     def __init__(self, bot:bot_class.Bot):
         self.bot = bot
         self.bindport = 4577
         self._logger = logging.getLogger(self.__class__.__name__)
+        self.cmd_ws:web.WebSocketResponse = None
     async def notfoundfallback(self,request:web.Request):
         return web.Response(body=b"",status=404)
     async def setup(self):
         self.app = web.Application()
         self.app.router.add_post("/chat", self.chat)
+        self.app.router.add_post("/command", self.cmd)
         self.app.router.add_route("*", "/{tail:.*}", self.deny_all)
         self.runner = web.AppRunner(self.app)
         await self.runner.setup()
@@ -69,6 +72,27 @@ class AsyncHttpChatRelay(commands.Cog):
                 self._logger.error("Failed to send message to channel #{} ({}) via webhook:".format(ch.name, ch.id))
                 log_exc(self._logger,e)
         self._logger.debug("WebSocket client disconnected")
+    async def cmd(self,request:web.Request):
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
+        self._logger.debug("WebSocket client connected")
+        self.cmd_ws = ws
+        # now, from commands defined in this cog they can cmd_ws.send_json() to send commands to the client
+    @app_commands.command(name="command",description="Make the Minecraft server execute a command")
+    async def command(self,interaction:discord.Interaction,command:str):
+        #~ begin block early return
+        if not pt(interaction.user).DEV:
+            return await interaction.response.send_message(noperm, ephemeral=True)
+        if self.cmd_ws is None:
+            return await interaction.response.send_message("Command WebSocket not yet initialized, try again later...", ephemeral=True)
+        if self.cmd_ws.closed:
+            return await interaction.response.send_message("Command WebSocket closed, try again a few minutes...", ephemeral=True)
+        #~ finish block early return
+        try:
+            await self.cmd_ws.send_str(command)
+        except Exception as e:
+            await interaction.response.send_message("An error occurred while sending the command to the socket.\n"+codeblock_wrap(traceback.format_exception(e)), ephemeral=True)
+            log_exc(self._logger, e)
     def _log(self, msg:str):
         self._logger.info(msg)
     def cog_unload(self):

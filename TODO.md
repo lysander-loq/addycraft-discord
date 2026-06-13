@@ -6,8 +6,8 @@
 - [x] dev commands
 - [ ] db audit
     - [x] table
-    - [] struct
-    - [] commands & code
+    - [ ] struct
+    - [ ] commands & code
 - [ ] commands
     - [x] `/team request <rank> <message>`
-    - adzel put something else here plsss :3
+    - adzel put something else here pls :3
