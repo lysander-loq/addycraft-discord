@@ -10,7 +10,6 @@ class AsyncHttpChatRelay(commands.Cog):
         self.bot = bot
         self.bindport = 4577
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger
     async def notfoundfallback(self,request:web.Request):
         return web.Response(body=b"",status=404)
     async def setup(self):
@@ -27,20 +26,32 @@ class AsyncHttpChatRelay(commands.Cog):
             self.runner = None
             self.site = None
             self.app = None
-    async def chat(self,request:web.Request):  ## WARNING: HIGHLY UNOPTIMIZED
-        data = await request.json()
+    async def chat(self,request:web.Request):  ## TODO: optz w/ whook cache maybe
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
+        self._logger.debug("WebSocket client connected")
+        async for msg in ws:
+            if msg.type != web.WSMsgType.TEXT:
+                self._logger.debug("Got non-text message, ignoring...")
+                continue
+            try:
+                data = msg.json()
+            except Exception:
+                await ws.send_json({"error": "Invalid JSON"})
+                self._logger.error("Error parsing JSON from WebSocket client: {}".format(msg.data))
+                continue
         try:
             assert "content" in data,"Missing content parameter in request JSON body"
             assert "srv" in data,"Missing srv parameter in request JSON body"
             assert "user" in data,"Missing user parameter in request JSON body"
             assert "staffchat" in data,"Missing staffchat parameter in request JSON body"
         except AssertionError as e:
-            return web.json_response(status=400,data={"error": str(e)})
+            return ws.send_json({"error": str(e)})
         content = data["content"]
         srv = data["srv"]
         user = data["user"]
         staffchat = data["staffchat"]
-        if staffchat:return web.json_response(status=500,data={"error":PCD})
+        if staffchat:return ws.send_json({"error":PCD})
         for chid in chat_relay_channel_ids:
             ch=self.bot.get_channel(chid)
             if not ch:
@@ -57,6 +68,7 @@ class AsyncHttpChatRelay(commands.Cog):
             except Exception as e:
                 self._logger.error("Failed to send message to channel #{} ({}) via webhook:".format(ch.name, ch.id))
                 log_exc(self._logger,e)
+        self._logger.debug("WebSocket client disconnected")
     def _log(self, msg:str):
         self._logger.info(msg)
     def cog_unload(self):
